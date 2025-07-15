@@ -389,6 +389,184 @@ body {
     line-height: 1.6;
 }
 
+/* Cloudinary 관련 스타일 */
+.cloudinary-config {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    color: white;
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.cloudinary-config h3 {
+    margin-bottom: 20px;
+    color: white;
+    text-align: center;
+    font-size: 22px;
+}
+
+.config-info {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.config-info p {
+    margin: 8px 0;
+    color: white;
+}
+
+.signup-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.signup-link:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.config-grid {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.cloudinary-config .config-field label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: white;
+}
+
+.cloudinary-config .config-field input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+.cloudinary-config .config-field input:focus {
+    outline: none;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.cloudinary-config .config-field small {
+    display: block;
+    margin-top: 5px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+}
+
+.config-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cloudinary-config .btn-primary,
+.cloudinary-config .btn-secondary {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.cloudinary-config .btn-primary {
+    background: white;
+    color: #ff6b6b;
+}
+
+.cloudinary-config .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+}
+
+.cloudinary-config .btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.cloudinary-config .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.cloudinary-upload-area {
+    margin-bottom: 20px;
+}
+
+.cloudinary-upload-area h3 {
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 20px;
+}
+
+.upload-features {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.feature-tag {
+    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cloudinary-status {
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.cloudinary-status .status-success {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.cloudinary-status .status-warning {
+    color: #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.cloud-upload-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     .admin-container {

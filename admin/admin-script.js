@@ -10,11 +10,15 @@ let isResizing = false;
 let dragStart = { x: 0, y: 0 };
 let resizeHandle = null;
 
-// Cloudinary 설정 (사용자가 자신의 클라우드 이름으로 변경해야 함)
-const CLOUDINARY_CONFIG = {
-    cloudName: 'YOUR_CLOUD_NAME', // 여기에 Cloudinary 클라우드 이름 입력
-    uploadPreset: 'YOUR_UPLOAD_PRESET' // 여기에 업로드 프리셋 입력
+// Cloudinary 설정 변수
+let cloudinaryConfig = {
+    cloudName: '',
+    uploadPreset: '',
+    apiKey: ''
 };
+
+// Cloudinary 업로드 위젯 변수
+let cloudinaryWidget = null;
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
@@ -23,6 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     renderSlides();
     updatePositionSelect();
+    
+    // Cloudinary 설정 로드
+    loadCloudinaryConfig();
+    
+    // Cloudinary 라이브러리 로드 확인
+    if (typeof cloudinary !== 'undefined') {
+        console.log('Cloudinary 라이브러리 로드됨');
+    } else {
+        console.warn('Cloudinary 라이브러리가 로드되지 않았습니다');
+    }
 });
 
 // 설정 로드
@@ -719,4 +733,242 @@ function showMessage(message, type = 'info') {
             messageDiv.remove();
         }
     }, 3000);
+}
+
+// ===========================================
+// Cloudinary 기능
+// ===========================================
+
+// Cloudinary 설정 로드
+function loadCloudinaryConfig() {
+    const savedConfig = localStorage.getItem('cloudinaryConfig');
+    if (savedConfig) {
+        try {
+            cloudinaryConfig = JSON.parse(savedConfig);
+            console.log('Cloudinary 설정 로드됨');
+            
+            // UI 업데이트
+            const cloudNameInput = document.getElementById('cloudinaryCloudName');
+            const presetInput = document.getElementById('cloudinaryUploadPreset');
+            const apiKeyInput = document.getElementById('cloudinaryApiKey');
+            
+            if (cloudNameInput) cloudNameInput.value = cloudinaryConfig.cloudName || '';
+            if (presetInput) presetInput.value = cloudinaryConfig.uploadPreset || '';
+            if (apiKeyInput) apiKeyInput.value = cloudinaryConfig.apiKey || '';
+            
+            updateCloudinaryStatus();
+        } catch (error) {
+            console.error('Cloudinary 설정 로드 오류:', error);
+        }
+    }
+}
+
+// Cloudinary 설정 저장
+function saveCloudinaryConfig() {
+    const cloudName = document.getElementById('cloudinaryCloudName').value.trim();
+    const uploadPreset = document.getElementById('cloudinaryUploadPreset').value.trim();
+    const apiKey = document.getElementById('cloudinaryApiKey').value.trim();
+    
+    if (!cloudName || !uploadPreset) {
+        showMessage('Cloud Name과 Upload Preset은 필수 항목입니다.', 'error');
+        return;
+    }
+    
+    cloudinaryConfig = {
+        cloudName,
+        uploadPreset,
+        apiKey
+    };
+    
+    try {
+        localStorage.setItem('cloudinaryConfig', JSON.stringify(cloudinaryConfig));
+        showMessage('Cloudinary 설정이 저장되었습니다.', 'success');
+        updateCloudinaryStatus();
+        initializeCloudinaryWidget();
+    } catch (error) {
+        console.error('Cloudinary 설정 저장 오류:', error);
+        showMessage('설정 저장 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// Cloudinary 연결 테스트
+async function testCloudinaryConnection() {
+    if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
+        showMessage('먼저 Cloudinary 설정을 저장해주세요.', 'error');
+        return;
+    }
+    
+    try {
+        showMessage('Cloudinary 연결을 테스트하고 있습니다...', 'info');
+        
+        // 테스트용 작은 이미지 생성 (1x1 픽셀 투명 PNG)
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const testImageData = canvas.toDataURL('image/png');
+        
+        const formData = new FormData();
+        formData.append('file', testImageData);
+        formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+        
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            showMessage('✅ Cloudinary 연결이 성공적으로 확인되었습니다!', 'success');
+            
+            // 테스트 이미지 삭제 (선택사항)
+            if (cloudinaryConfig.apiKey && result.public_id) {
+                deleteTestImage(result.public_id);
+            }
+        } else {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+    } catch (error) {
+        console.error('Cloudinary 연결 테스트 오류:', error);
+        showMessage('Cloudinary 연결 실패: ' + error.message, 'error');
+    }
+}
+
+// 테스트 이미지 삭제
+async function deleteTestImage(publicId) {
+    try {
+        // 테스트 이미지 삭제는 API Key가 필요하므로 스킵
+        console.log('테스트 이미지 업로드 완료:', publicId);
+    } catch (error) {
+        console.log('테스트 이미지 삭제 실패 (무시해도 됨):', error);
+    }
+}
+
+// Cloudinary 위젯 초기화
+function initializeCloudinaryWidget() {
+    if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
+        console.log('Cloudinary 설정이 완료되지 않음');
+        return;
+    }
+    
+    if (typeof cloudinary === 'undefined') {
+        console.error('Cloudinary 라이브러리가 로드되지 않았습니다.');
+        showMessage('Cloudinary 라이브러리 로드 오류', 'error');
+        return;
+    }
+    
+    try {
+        cloudinaryWidget = cloudinary.createUploadWidget({
+            cloudName: cloudinaryConfig.cloudName,
+            uploadPreset: cloudinaryConfig.uploadPreset,
+            multiple: false,
+            maxFiles: 1,
+            resourceType: 'image',
+            clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+            maxFileSize: 10000000, // 10MB
+            folder: 'slider-images',
+            sources: [
+                'local',
+                'url',
+                'camera'
+            ],
+            showAdvancedOptions: true,
+            cropping: true,
+            croppingAspectRatio: 16/9,
+            theme: 'minimal'
+        }, function(error, result) {
+            if (error) {
+                console.error('Cloudinary 업로드 오류:', error);
+                showMessage('업로드 오류: ' + error.message, 'error');
+                return;
+            }
+            
+            if (result && result.event === 'success') {
+                console.log('Cloudinary 업로드 성공:', result.info);
+                handleCloudinaryUploadSuccess(result.info);
+            }
+        });
+        
+        console.log('Cloudinary 위젯 초기화 완료');
+        updateCloudinaryStatus();
+        
+    } catch (error) {
+        console.error('Cloudinary 위젯 초기화 오류:', error);
+        showMessage('Cloudinary 위젯 초기화 실패', 'error');
+    }
+}
+
+// Cloudinary 업로드 버튼 클릭
+function openCloudinaryWidget() {
+    if (!cloudinaryWidget) {
+        showMessage('먼저 Cloudinary 설정을 완료해주세요.', 'error');
+        return;
+    }
+    
+    try {
+        cloudinaryWidget.open();
+    } catch (error) {
+        console.error('Cloudinary 위젯 열기 오류:', error);
+        showMessage('업로드 위젯을 열 수 없습니다.', 'error');
+    }
+}
+
+// Cloudinary 업로드 성공 처리
+function handleCloudinaryUploadSuccess(info) {
+    try {
+        const newSlide = {
+            id: Date.now().toString(),
+            backgroundImage: info.secure_url,
+            type: 'cloudinary',
+            cloudinaryData: {
+                public_id: info.public_id,
+                secure_url: info.secure_url,
+                width: info.width,
+                height: info.height,
+                format: info.format,
+                resource_type: info.resource_type,
+                created_at: info.created_at
+            },
+            uploadedAt: new Date().toISOString()
+        };
+        
+        sliderConfig.slides.push(newSlide);
+        renderSlides();
+        updatePositionSelect();
+        
+        showMessage('✅ 클라우드 업로드가 완료되었습니다!', 'success');
+        
+        // 설정 자동 저장
+        saveSliderConfig();
+        
+    } catch (error) {
+        console.error('슬라이드 추가 오류:', error);
+        showMessage('슬라이드 추가 중 오류가 발생했습니다.', 'error');
+    }
+}
+
+// Cloudinary 상태 업데이트
+function updateCloudinaryStatus() {
+    const statusDiv = document.getElementById('cloudinaryStatus');
+    if (!statusDiv) return;
+    
+    if (cloudinaryConfig.cloudName && cloudinaryConfig.uploadPreset) {
+        statusDiv.innerHTML = '<p class="status-success">✅ Cloudinary 설정이 완료되었습니다. 이제 이미지를 업로드할 수 있습니다.</p>';
+        
+        // 업로드 버튼 활성화
+        const uploadBtn = document.getElementById('cloudUploadBtn');
+        if (uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = '☁️ 클라우드에 이미지 업로드';
+        }
+    } else {
+        statusDiv.innerHTML = '<p class="status-warning">⚠️ Cloudinary 설정을 완료해주세요.</p>';
+        
+        // 업로드 버튼 비활성화
+        const uploadBtn = document.getElementById('cloudUploadBtn');
+        if (uploadBtn) {
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '설정 완료 후 업로드 가능';
+        }
+    }
 } 
