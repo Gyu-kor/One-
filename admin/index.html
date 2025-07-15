@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슬라이더 관리자</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <!-- Cloudinary 업로드 위젯 -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>슬라이더 이미지 관리</h1>
+            <p>웹사이트 메인 슬라이더의 배경 이미지를 관리할 수 있습니다</p>
+            <div class="upload-method-selector">
+                <label for="uploadMethod">업로드 방식:</label>
+                <select id="uploadMethod">
+                    <option value="local">로컬 업로드 (임시)</option>
+                    <option value="cloudinary">클라우드 업로드 (영구)</option>
+                </select>
+                <small>클라우드 업로드를 사용하면 Netlify에서도 이미지가 유지됩니다</small>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <!-- 클라우드 업로드 섹션 -->
+            <section class="cloud-upload-section" id="cloudUploadSection" style="display: none;">
+                <h2>클라우드 이미지 업로드</h2>
+                <div class="cloud-upload-area">
+                    <button type="button" id="cloudUploadBtn" class="btn-primary cloud-upload-btn">
+                        ☁️ 클라우드에 이미지 업로드
+                    </button>
+                    <p>업로드된 이미지는 영구적으로 저장되며 Netlify에서도 사용 가능합니다</p>
+                </div>
+            </section>
+
+            <!-- 기존 이미지 업로드 섹션 -->
+            <section class="upload-section" id="localUploadSection">
+                <h2>로컬 이미지 업로드 (임시)</h2>
+                <div class="warning-notice">
+                    ⚠️ 로컬 업로드는 임시적입니다. Netlify에서는 새로고침 시 이미지가 사라질 수 있습니다.
+                </div>
+                
+                <!-- 슬라이드 위치 선택 -->
+                <div class="position-select">
+                    <label for="slidePosition">슬라이드 위치 선택:</label>
+                    <select id="slidePosition">
+                        <option value="end">마지막에 추가</option>
+                    </select>
+                </div>
+
+                <!-- 크롭 옵션 선택 -->
+                <div class="crop-option">
+                    <label for="cropOption">이미지 처리 방식:</label>
+                    <select id="cropOption">
+                        <option value="crop">크롭하여 추가 (권장)</option>
+                        <option value="original">원본 그대로 추가</option>
+                    </select>
+                    <small class="option-description">크롭: 이미지 일부를 선택하여 추가 | 원본: 이미지를 그대로 추가</small>
+                </div>
+
+                <!-- 미리보기 영역 -->
+                <div class="preview-section" id="previewSection" style="display: none;">
+                    <h3>미리보기</h3>
+                    <div class="preview-container">
+                        <img id="previewImage" src="" alt="미리보기">
+                        <div class="crop-overlay">
+                            <div class="crop-area" id="cropArea">
+                                <div class="resize-handle top-left"></div>
+                                <div class="resize-handle top-right"></div>
+                                <div class="resize-handle bottom-left"></div>
+                                <div class="resize-handle bottom-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="preview-controls">
+                        <button type="button" id="confirmUpload" class="btn-primary">이미지 추가</button>
+                        <button type="button" id="cancelUpload" class="btn-secondary">취소</button>
+                    </div>
+                </div>
+
+                <!-- 드래그 앤 드롭 영역 -->
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>이미지를 드래그하여 업로드하거나 클릭하여 선택하세요</p>
+                        <small>JPG, PNG, GIF, WebP 형식 (최대 5MB)</small>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                </div>
+            </section>
+
+            <!-- 이미지 목록 섹션 -->
+            <section class="slides-section">
+                <div class="section-header">
+                    <h2>슬라이드 목록</h2>
+                    <div class="header-actions">
+                        <button type="button" id="exportConfig" class="btn-secondary">설정 내보내기</button>
+                        <button type="button" id="importConfig" class="btn-secondary">설정 가져오기</button>
+                        <button type="button" id="saveButton" class="btn-primary">설정 저장</button>
+                    </div>
+                </div>
+                <div id="slidesList">
+                    <!-- 슬라이드 목록이 여기에 동적으로 생성됩니다 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 파일 가져오기용 숨겨진 input -->
+    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+
+    <script src="admin-script.js"></script>
+</body>
+</html> 

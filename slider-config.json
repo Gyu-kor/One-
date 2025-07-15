@@ -1,0 +1,25 @@
+{
+  "slides": [
+    {
+      "id": 1,
+      "image": "images/slider/slide1.jpg",
+      "title": "더원디자인그룹",
+      "subtitle": "전문적인 인테리어 & 컨설팅",
+      "active": true
+    },
+    {
+      "id": 2,
+      "image": "images/slider/slide2.jpg", 
+      "title": "HACCP 컨설팅",
+      "subtitle": "식품안전관리인증기준 전문 컨설팅",
+      "active": true
+    },
+    {
+      "id": 3,
+      "image": "images/slider/slide3.jpg",
+      "title": "스마트팜 구축", 
+      "subtitle": "첨단 농업 시설 설계 및 시공",
+      "active": true
+    }
+  ]
+} 
