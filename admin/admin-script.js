@@ -805,32 +805,54 @@ async function testCloudinaryConnection() {
         const canvas = document.createElement('canvas');
         canvas.width = 1;
         canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'rgba(255,255,255,1)';
+        ctx.fillRect(0, 0, 1, 1);
+        
+        // Base64 데이터 추출
         const testImageData = canvas.toDataURL('image/png');
+        const base64Data = testImageData.split(',')[1];
         
         const formData = new FormData();
         formData.append('file', testImageData);
-        formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+        formData.append('upload_preset', cloudinaryConfig.uploadPreset.trim());
+        formData.append('cloud_name', cloudinaryConfig.cloudName.trim());
         
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, {
+        console.log('테스트 요청 정보:', {
+            cloudName: cloudinaryConfig.cloudName.trim(),
+            uploadPreset: cloudinaryConfig.uploadPreset.trim()
+        });
+        
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName.trim()}/image/upload`, {
             method: 'POST',
             body: formData
         });
         
-        if (response.ok) {
-            const result = await response.json();
+        const result = await response.json();
+        console.log('Cloudinary 응답:', result);
+        
+        if (response.ok && result.secure_url) {
             showMessage('✅ Cloudinary 연결이 성공적으로 확인되었습니다!', 'success');
             
-            // 테스트 이미지 삭제 (선택사항)
-            if (cloudinaryConfig.apiKey && result.public_id) {
-                deleteTestImage(result.public_id);
-            }
+            // 테스트 이미지 정보 표시
+            console.log('테스트 이미지 URL:', result.secure_url);
+            
         } else {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // 에러 세부 정보 표시
+            const errorMsg = result.error?.message || `HTTP ${response.status}: ${response.statusText}`;
+            throw new Error(errorMsg);
         }
         
     } catch (error) {
         console.error('Cloudinary 연결 테스트 오류:', error);
-        showMessage('Cloudinary 연결 실패: ' + error.message, 'error');
+        let errorMessage = 'Cloudinary 연결 실패: ' + error.message;
+        
+        // 일반적인 오류에 대한 해결책 제시
+        if (error.message.includes('400')) {
+            errorMessage += '\n\n해결방법:\n1. Upload Preset이 "Unsigned" 모드인지 확인\n2. Cloud Name과 Upload Preset 정보 재확인';
+        }
+        
+        showMessage(errorMessage, 'error');
     }
 }
 
